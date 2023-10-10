@@ -1,0 +1,8 @@
+ChatGPT:
+    connect-timeout: 60000
+    read-timeout: 60000
+    variables:
+        apiKey: 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
+        model: gpt-3.5-turbo-16k
+        maxTokens: 200
+        temperature: 0.5
