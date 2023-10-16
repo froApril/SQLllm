@@ -1,10 +1,12 @@
 package usyd.elec5620.sqlllm.mapper.defaultdb;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 import org.springframework.stereotype.Repository;
 import usyd.elec5620.sqlllm.entity.defaultdb.DefaultDbUser;
+import usyd.elec5620.sqlllm.vo.User;
 
 import java.util.List;
 import java.util.Map;

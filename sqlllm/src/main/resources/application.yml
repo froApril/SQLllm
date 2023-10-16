@@ -6,3 +6,7 @@ ChatGPT:
         model: gpt-3.5-turbo-16k
         maxTokens: 200
         temperature: 0.5
+
+mybatis:
+    configuration:
+        log-impl: org.apache.ibatis.logging.stdout.StdOutImpl

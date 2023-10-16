@@ -46,7 +46,7 @@ public class DataBaseController {
         }
     }
 
-    @PostMapping("/reset")
+    @GetMapping("/reset")
     public Object resetToDefaultDb() {
         status = DbStatus.DEFAULT_DATABASE;
         return ResponseResult.success("Database has been reset");
