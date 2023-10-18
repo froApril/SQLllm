@@ -23,7 +23,7 @@ public interface TableMapper extends BaseMapper<Object> {
     List<Map<String, Object>> selectColumsList(@Param("tableName") String tableName);
 
 
-    @Insert("insert into user values(null, #{user.username},#{user.password},#{user.type}, #{user.query_time})")
+    @Insert("insert into user values(null, #{user.username},#{user.password},#{user.type}, #{user.times})")
     int addUser(@Param("user") User user);
 
     @Select("select * from user where username = #{username} and password = #{password}")
