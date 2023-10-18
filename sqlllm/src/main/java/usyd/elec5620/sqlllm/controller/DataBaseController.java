@@ -2,10 +2,7 @@ package usyd.elec5620.sqlllm.controller;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import usyd.elec5620.sqlllm.mapper.customizeddb.TableMapper;
 import usyd.elec5620.sqlllm.proxy.JdkParamDsMethodProxy;
 import usyd.elec5620.sqlllm.service.defaultdb.DefaultDbUserService;
@@ -46,6 +43,7 @@ public class DataBaseController {
         }
     }
 
+    @CrossOrigin
     @GetMapping("/reset")
     public Object resetToDefaultDb() {
         status = DbStatus.DEFAULT_DATABASE;
@@ -63,7 +61,8 @@ public class DataBaseController {
         return ResponseResult.success(tables);
     }
 
-    @GetMapping("/table/info")
+    @CrossOrigin
+    @PostMapping ("/table/info")
     public Object getTableInfo(@RequestBody Map<String, String> obj) {
         String tableName = obj.get("tableName");
         Map<String, List> columns = new HashMap<>();
