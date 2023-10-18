@@ -65,19 +65,24 @@ public class DataBaseController {
     @PostMapping ("/table/info")
     public Object getTableInfo(@RequestBody Map<String, String> obj) {
         String tableName = obj.get("tableName");
-        Map<String, List> columns = new HashMap<>();
+        Map<String, List> res = new HashMap<>();
         List<Map<String, Object>> tableInfo;
+        List<Map<String, Object>> data;
+
         if (status == DbStatus.DEFAULT_DATABASE) {
             tableInfo = defaultDbUserService.getTableInfo(tableName);
+            data = defaultDbUserService.getAllDataFromTable(tableName);
         } else {
             tableInfo = tableMapper.selectColumsList(tableName);
+            data = tableMapper.selectAllData(tableName);
         }
         ArrayList<String> names = new ArrayList<>();
         for (Map table: tableInfo) {
             names.add((String) table.get("COLUMN_NAME"));
         }
-        columns.put("columns", names);
+        res.put("columns", names);
+        res.put("data", data);
 
-        return ResponseResult.success(columns);
+        return ResponseResult.success(res);
     }
 }

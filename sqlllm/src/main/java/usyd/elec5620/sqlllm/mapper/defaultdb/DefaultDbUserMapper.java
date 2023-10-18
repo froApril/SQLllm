@@ -20,4 +20,7 @@ public interface DefaultDbUserMapper extends BaseMapper<DefaultDbUser> {
 
     @Select("select * from information_schema.COLUMNS where TABLE_SCHEMA = (select database()) and TABLE_NAME=#{tableName}")
     List<Map<String, Object>> selectColumsList(@Param("tableName") String tableName);
+
+    @Select("select * from ${tableName}")
+    List<Map<String, Object>> selectAllDataFromTable(@Param("tableName")String tableName);
 }
