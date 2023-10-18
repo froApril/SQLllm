@@ -29,4 +29,9 @@ public class DefaultDbUserService {
     public List<Map<String,Object>> getTableInfo(String tableName) {
         return defaultDbUserMapper.selectColumsList(tableName);
     };
+
+    @DS
+    public List<Map<String, Object>> getAllDataFromTable(String tableName) {
+        return defaultDbUserMapper.selectAllDataFromTable(tableName);
+    }
 }

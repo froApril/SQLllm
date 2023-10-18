@@ -31,4 +31,7 @@ public interface TableMapper extends BaseMapper<Object> {
 
     @Update("update user SET times = #{user.times} where username = #{user.username}")
     int updateUser(@Param("user")User user);
+
+    @Select("select * from ${tableName}")
+    List<Map<String, Object>> selectAllData(@Param("tableName") String tableName);
 }
