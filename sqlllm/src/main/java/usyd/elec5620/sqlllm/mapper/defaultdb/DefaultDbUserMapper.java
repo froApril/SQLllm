@@ -23,4 +23,7 @@ public interface DefaultDbUserMapper extends BaseMapper<DefaultDbUser> {
 
     @Select("select * from ${tableName}")
     List<Map<String, Object>> selectAllDataFromTable(@Param("tableName")String tableName);
+
+    @Select("${sql}")
+    List<Map<String, Object>> executeSql(@Param("sql")String sql);
 }

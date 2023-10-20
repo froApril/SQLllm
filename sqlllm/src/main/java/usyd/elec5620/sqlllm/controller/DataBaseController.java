@@ -1,5 +1,6 @@
 package usyd.elec5620.sqlllm.controller;
 
+import cn.hutool.db.Session;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -11,6 +12,7 @@ import usyd.elec5620.sqlllm.vo.DbInfo;
 import usyd.elec5620.sqlllm.vo.DbStatus;
 import usyd.elec5620.sqlllm.vo.ResponseResult;
 
+import javax.servlet.http.HttpSession;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -84,5 +86,23 @@ public class DataBaseController {
         res.put("data", data);
 
         return ResponseResult.success(res);
+    }
+
+    @PostMapping("/execute")
+    public Object executeSql(@RequestBody Map<String, String> obj) {
+        try {
+            String sql = obj.get("sql");
+            System.out.println(sql);
+            List<Map<String, Object>> data;
+            if (status == DbStatus.DEFAULT_DATABASE) {
+                data = defaultDbUserService.getData(sql);
+            } else {
+                System.out.println("here");
+                data = tableMapper.executeSql(sql);
+            }
+            return ResponseResult.success(data);
+        } catch (Exception e) {
+            return ResponseResult.error(e.getMessage());
+        }
     }
 }

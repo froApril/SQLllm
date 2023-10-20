@@ -34,4 +34,10 @@ public interface TableMapper extends BaseMapper<Object> {
 
     @Select("select * from ${tableName}")
     List<Map<String, Object>> selectAllData(@Param("tableName") String tableName);
+
+    @Select("${sql}")
+    List<Map<String, Object>> executeSql(@Param("sql")String sql);
+
+    @Select("select * from user")
+    List<User> allUser();
 }

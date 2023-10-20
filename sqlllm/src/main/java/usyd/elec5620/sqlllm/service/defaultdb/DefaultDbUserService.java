@@ -34,4 +34,9 @@ public class DefaultDbUserService {
     public List<Map<String, Object>> getAllDataFromTable(String tableName) {
         return defaultDbUserMapper.selectAllDataFromTable(tableName);
     }
+
+    @DS
+    public List<Map<String, Object>> getData(String sql) {
+        return defaultDbUserMapper.executeSql(sql);
+    }
 }
