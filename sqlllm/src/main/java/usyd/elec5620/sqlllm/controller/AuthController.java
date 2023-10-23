@@ -5,10 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import usyd.elec5620.sqlllm.config.DynamicDataSourceConfig;
 import usyd.elec5620.sqlllm.mapper.customizeddb.TableMapper;
 import usyd.elec5620.sqlllm.proxy.JdkParamDsMethodProxy;
@@ -33,6 +30,7 @@ public class AuthController {
     private TableMapper tableMapper;
 
 
+    @CrossOrigin
     @PostMapping("/signup")
     public Object signUp(@RequestBody User user) throws Exception {
         String newDsKey = System.currentTimeMillis() + "";
@@ -45,6 +43,7 @@ public class AuthController {
     }
 
 
+    @CrossOrigin
     @GetMapping("/login")
     public Object login(@RequestBody User user, HttpSession session) throws Exception {
         String newDsKey = System.currentTimeMillis() + "";

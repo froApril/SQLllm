@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数据库连接示例</title>
+    <style>
+        /* 添加你的CSS样式 */
+        #startContainer {
+            text-align: center;
+        }
+
+        #tableList {
+            display: none;
+            text-align: left;
+        }
+
+        #tableContent {
+            display: none;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        th,
+        td {
+            border: 1px solid #dddddd;
+            text-align: left;
+            padding: 8px;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        /* 模态对话框样式 */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+
+        }
+
+        .modal-content {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+
+        }
+
+        /* 修改CSS样式 */
+        #chatContainer {
+            margin-top: 20px;
+            padding: 10px;
+            border-top: 1px solid #ccc;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            background-color: white;
+
+        }
+
+        #chatOutput {
+            width: 50vw;
+            background-color: white;
+            color: #333;
+            border-radius: 5px;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+
+        #messageInput {
+            width: 70vw;
+            /* 让输入框自动扩展以占据剩余的宽度 */
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        #sendMessage {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 8px;
+            cursor: pointer;
+            width: 5vw;
+        }
+
+        #sendMessage:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="navbar">
+        <button id="loginButton">Login</button>
+    </div>
+
+    <!-- Login Modal -->
+    <div id="loginModal" class="modal">
+        <div class="modal-content">
+            <span id="closeLoginModal">&times;</span>
+            <h2>Login</h2>
+            <label for="loginUsername">Username:</label>
+            <input type="text" id="loginUsername" placeholder="Username"><br>
+            <label for="loginPassword">Password:</label>
+            <input type="password" id="loginPassword" placeholder="Password"><br>
+            <button id="confirmLogin">Login</button>
+            <button id="switchToSignup">Sign Up</button>
+        </div>
+    </div>
+
+    <!-- Signup Modal (initially hidden) -->
+    <div id="signupModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span id="closeSignupModal">&times;</span>
+            <h2>Sign Up</h2>
+            <label>Account Type:</label>
+            <select id="accountType">
+                <option value="user">User</option>
+                <option value="admin">Administrator</option>
+            </select><br>
+            <label for="signupUsername">Username:</label>
+            <input type="text" id="signupUsername" placeholder="Username"><br>
+            <label for="signupPassword">Password:</label>
+            <input type="password" id="signupPassword" placeholder="Password"><br>
+            <button id="confirmSignup">Sign Up</button>
+            <button id="switchToLogin">Back to Login</button>
+        </div>
+    </div>
+
+
+    <div id="startContainer">
+        <button id="connectButton">连接数据库</button>
+        <button id="confirmButton" disabled>确定</button>
+    </div>
+
+    <!-- 模态对话框 -->
+    <div id="myModal" class="modal">
+        <div class="modal-content">
+            <span id="closeModal">&times;</span>
+            <h2>数据库连接信息</h2>
+            <label for="ip">IP:</label>
+            <input type="text" id="ip" placeholder="请输入IP"><br>
+            <label for="port">Port:</label>
+            <input type="text" id="port" placeholder="请输入Port"><br>
+            <label for="dbName">Database Name:</label>
+            <input type="text" id="dbName" placeholder="请输入Database Name"><br>
+            <label for="driveClassName">Drive Class Name:</label>
+            <input type="text" id="driveClassName" placeholder="请输入Drive Class Name"><br>
+            <label for="username">Username:</label>
+            <input type="text" id="username" placeholder="请输入Username"><br>
+            <label for="password">Password:</label>
+            <input type="password" id="password" placeholder="请输入Password"><br>
+
+            <button id="connectDatabase">确定</button>
+
+        </div>
+    </div>
+
+
+    <button id="showDefaultDatabase">Show Default Database</button>
+    <select id="tableDropdown"></select>
+    <div id="tableDetails"></div>
+
+    <!-- 聊天输入框和聊天输出区域 -->
+    <div id="chatContainer">
+        <div id="chatOutput"></div>
+        <div id="chatInput">
+            <input type="text" id="messageInput" placeholder="输入消息...">
+            <button id="sendMessage">发送</button>
+        </div>
+    </div>
+
+    <script>
+        // 添加JavaScript代码
+        const connectButton = document.getElementById("connectButton");
+        const confirmButton = document.getElementById("confirmButton");
+        const tableList = document.getElementById("tableList");
+        const selectButton = document.getElementById("selectButton");
+        const tableContent = document.getElementById("tableContent");
+        const modal = document.getElementById("myModal");
+        const closeModalButton = document.getElementById("closeModal");
+        const connectDatabaseButton = document.getElementById("connectDatabase");
+        const messageInput = document.getElementById("messageInput");
+        const sendMessageButton = document.getElementById("sendMessage");
+        const chatOutput = document.getElementById("chatOutput");
+        const loginButton = document.getElementById("loginButton");
+        const loginModal = document.getElementById("loginModal");
+        const signupModal = document.getElementById("signupModal");
+        const closeLoginModalButton = document.getElementById("closeLoginModal");
+        const closeSignupModalButton = document.getElementById("closeSignupModal");
+        const switchToSignupButton = document.getElementById("switchToSignup");
+        const switchToLoginButton = document.getElementById("switchToLogin");
+        const confirmSignupButton = document.getElementById("confirmSignup");
+        const signupUsername = document.getElementById("signupUsername");
+        const signupPassword = document.getElementById("signupPassword");
+        const accountType = document.getElementById("accountType");
+        const confirmLoginButton = document.getElementById("confirmLogin");
+        const loginUsername = document.getElementById("loginUsername");
+        const loginPassword = document.getElementById("loginPassword");
+
+        loginButton.addEventListener("click", () => {
+            loginModal.style.display = "block";
+        });
+
+        closeLoginModalButton.addEventListener("click", () => {
+            loginModal.style.display = "none";
+        });
+
+        switchToSignupButton.addEventListener("click", () => {
+            loginModal.style.display = "none";
+            signupModal.style.display = "block";
+        });
+
+        closeSignupModalButton.addEventListener("click", () => {
+            signupModal.style.display = "none";
+        });
+
+        switchToLoginButton.addEventListener("click", () => {
+            signupModal.style.display = "none";
+            loginModal.style.display = "block";
+        });
+
+
+        connectButton.addEventListener("click", () => {
+            // 弹出数据库连接输入窗口
+            modal.style.display = "block";
+        });
+
+        closeModalButton.addEventListener("click", () => {
+            // 关闭输入窗口
+            modal.style.display = "none";
+        });
+
+        confirmSignupButton.addEventListener("click", () => {
+            const username = signupUsername.value.trim();
+            const password = signupPassword.value.trim();
+            const type = accountType.value === "user" ? 1 : 0;
+
+            if (username && password) {
+                const dataToSend = {
+                    username,
+                    password,
+                    type,
+                    times: 10
+                };
+
+                fetch('http://localhost:8080/signup', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(dataToSend)
+                })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok ' + response.statusText);
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        alert(data.resultData);
+                    })
+                    .catch(error => {
+                        console.error('There has been a problem with your fetch operation:', error);
+                        alert('An error occurred. Please try again.');
+                    });
+            } else {
+                alert("Please fill in all the fields.");
+            }
+        });
+
+        confirmLoginButton.addEventListener("click", () => {
+            const username = loginUsername.value.trim();
+            const password = loginPassword.value.trim();
+
+            if (username && password) {
+                const dataToSend = {
+                    username,
+                    password
+                };
+
+                fetch('http://localhost:8080/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(dataToSend)
+                })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok ' + response.statusText);
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        alert(data.resultData);
+                    })
+                    .catch(error => {
+                        console.error('There has been a problem with your fetch operation:', error);
+                        alert('An error occurred. Please try again.');
+                    });
+            } else {
+                alert("Please enter both username and password.");
+            }
+        });
+        //switchdatabase
+        document.getElementById('connectDatabase').addEventListener('click', function () {
+            let ipValue = document.getElementById('ip').value;
+            let portValue = document.getElementById('port').value;
+            let dbNameValue = document.getElementById('dbName').value;
+            let driveClassNameValue = document.getElementById('driveClassName').value;
+            let usernameValue = document.getElementById('username').value;
+            let passwordValue = document.getElementById('password').value;
+
+            let dataToSend = {
+                ip: ipValue,
+                port: portValue,
+                dbName: dbNameValue,
+                driveClassName: driveClassNameValue,
+                username: usernameValue,
+                password: passwordValue
+            };
+
+            fetch('http://localhost:8080/switch', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(dataToSend)
+            })
+                .then(response => response.json())
+                .then(data => {
+                    alert(data.resultData);
+                    //               if (data.resultData.includes("successfully")) {
+                    // Close the modal if the connection was successful
+                    //                    document.getElementById('myModal').style.display = "none";
+                    //              }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred. Please try again.');
+                });
+        });
+
+
+        //connectdefaultdatabase
+        document.getElementById('showDefaultDatabase').addEventListener('click', function () {
+
+            fetch('http://localhost:8080/table/', {
+                method: 'GET'
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    let tables = data.resultData;
+                    let tableNames = tables.map(table => table.TABLE_NAME);
+
+                    let dropdown = document.getElementById('tableDropdown');
+                    dropdown.innerHTML = '<option>Select a table</option>';  // Default option
+                    tableNames.forEach(name => {
+                        let option = document.createElement('option');
+                        option.value = name;
+                        option.textContent = name;
+                        dropdown.appendChild(option);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error fetching table names:', error);
+                    alert('Failed to fetch table names. Please check the console for errors.');
+                });
+        });
+
+
+        //showdefaultdatabase
+        document.getElementById('tableDropdown').addEventListener('change', async function () {
+            let selectedTable = this.value;
+
+            if (selectedTable !== 'Select a table') {
+                try {
+                    // Add the tableName as a query parameter
+                    const response = await fetch(`http://localhost:8080/table/info`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+
+                        },
+                        body: JSON.stringify({ tableName: selectedTable })
+                    });
+
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+
+                    const data = await response.json();
+                    let columns = data.resultData.columns;
+                    console.log(columns);
+
+                    // Build an HTML table for the columns
+                    let tableHtml = '<table border="1">';
+                    tableHtml += '<thead><tr><th>No.</th><th>Column Name</th></tr></thead><tbody>';
+
+                    columns.forEach((columnName, index) => {
+                        tableHtml += `<tr><td>${index + 1}</td><td>${columnName}</td></tr>`;
+                    });
+
+                    tableHtml += '</tbody></table>';
+
+                    document.getElementById('tableDetails').innerHTML = tableHtml;
+
+                } catch (error) {
+                    console.error('Error fetching table details:', error);
+                    alert('Failed to fetch table details. Please check the console for errors.');
+                }
+            } else {
+                document.getElementById('tableDetails').innerText = '';  // Clear the details div
+            }
+        });
+
+
+        //        connectDatabaseButton.addEventListener("click", () => {
+        //          // 获取用户输入的数据库连接信息
+        //            const host = document.getElementById("host").value;
+        //          const username = document.getElementById("username").value;
+        //        const password = document.getElementById("password").value;
+        //      const database = document.getElementById("database").value;
+        //
+        // 连接数据库的代码应该在后端实现，这里只是一个示例
+        //           console.log(`Host: ${host}, Username: ${username}, Password: ${password}, Database: ${database}`);
+
+        // 关闭输入窗口
+        //       modal.style.display = "none";
+        //         tableList.style.display = "block"; // 显示表格列表
+        // });
+        
+        //not used yet
+        selectButton.addEventListener("click", () => {
+            const selectedTable = document.querySelector('input[name="table"]:checked');
+            if (!selectedTable) {
+                alert("请至少选择一个表格。");
+            } else {
+                // 在这里可以获取用户选择的表格，并显示表格的具体内容（示例数据）
+                const selectedTableName = selectedTable.value;
+                tableContent.style.display = "block";
+            }
+        });
+
+        confirmButton.addEventListener("click", () => {
+            // 点击确定按钮后的操作
+        });
+
+
+        //chat part
+        sendMessageButton.addEventListener("click", () => {
+            const message = messageInput.value.trim();
+            if (message) {
+                displayUserMessage(message);
+                displayBackendMessage("loading...");
+                sendPostRequest(message)
+                    .then(response => {
+                        // Remove the loading message
+                        chatOutput.removeChild(chatOutput.lastChild);
+                        if (response.replyStr) {
+                            displayBackendMessage(response.replyStr);
+                        } else {
+                            displayBackendMessage("Sorry, I couldn't understand that.");
+                        }
+                    })
+                    .catch(error => {
+                        console.error("Error:", error);
+                        // Remove the loading message
+                        chatOutput.removeChild(chatOutput.lastChild);
+                        displayBackendMessage("An error occurred while trying to send your message.");
+                    });
+                // 清空输入框
+                messageInput.value = "";
+            }
+        });
+
+        //chat part
+        function displayUserMessage(message) {
+            const userMessageElement = document.createElement("div");
+            userMessageElement.textContent = "Me：" + message;
+            userMessageElement.style.backgroundColor = "#4CAF50";
+            userMessageElement.style.color = "white";
+            userMessageElement.style.borderRadius = "5px";
+            userMessageElement.style.padding = "10px";
+            userMessageElement.style.marginBottom = "10px";
+            chatOutput.appendChild(userMessageElement);
+        }
+
+        //chat part
+        function displayBackendMessage(message) {
+            const backendMessageElement = document.createElement("div");
+            backendMessageElement.textContent = "Database：" + message;
+            backendMessageElement.style.backgroundColor = "#ccc";
+            backendMessageElement.style.borderRadius = "5px";
+            backendMessageElement.style.padding = "10px";
+            backendMessageElement.style.marginBottom = "10px";
+            chatOutput.appendChild(backendMessageElement);
+        }
+
+        //chat part
+        async function sendPostRequest(message) {
+            try {
+                const response = await fetch('http://localhost:8080/askAi', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ askStr: message })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+
+                const data = await response.json();
+                return data;
+
+            } catch (error) {
+                console.error('Error during fetch operation:', error.message);
+                throw error;
+            }
+        }
+
+    </script>
+</body>
+
+</html>

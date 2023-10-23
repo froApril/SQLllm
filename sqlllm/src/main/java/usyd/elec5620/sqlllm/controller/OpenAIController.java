@@ -2,6 +2,7 @@ package usyd.elec5620.sqlllm.controller;
 
 import cn.hutool.json.JSONUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -30,6 +31,7 @@ public class OpenAIController {
     private TableMapper tableMapper;
 
 
+    @CrossOrigin
     @PostMapping("/askAi")
     public Object askAi(@RequestBody OpenAiRequest openAiRequest, HttpSession session) throws Exception{
         String newDsKey = System.currentTimeMillis() + "";

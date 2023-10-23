@@ -31,6 +31,7 @@ public class DataBaseController {
     private DbStatus status = DbStatus.DEFAULT_DATABASE;
 
 
+    @CrossOrigin
     @PostMapping("/switch")
     public Object switchToDb(@RequestBody DbInfo dbInfo) {
         try {
