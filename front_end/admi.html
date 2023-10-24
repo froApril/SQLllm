@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel</title>
+</head>
+<body>
+    <div id="tableDetails">
+        <h1>User Management</h1>
+        <div id="tableContainer"></div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            fetch('http://localhost:8080/users')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log(data);
+                    const users = data.resultData;
+                    const tableContainer = document.getElementById('tableContainer');
+                    tableContainer.innerHTML = generateTable(users);
+                })
+                .catch(error => {
+                    console.error('Error fetching user data:', error);
+                    alert('Failed to fetch user data. Please check the console for errors.');
+                });
+        });
+
+        function generateTable(users) {
+            let tableHtml = '<table border="1">';
+            tableHtml += '<thead><tr>';
+            const headers = ['ID', 'Username', 'Password', 'Type', 'Times', 'Settings'];
+            headers.forEach(header => {
+                tableHtml += `<th>${header}</th>`;
+            });
+            tableHtml += '</tr></thead><tbody>';
+
+            users.forEach(user => {
+                tableHtml += '<tr>';
+                Object.values(user).forEach(value => {
+                    tableHtml += `<td>${value}</td>`;
+                });
+                tableHtml += '<td><button>Settings</button></td>';
+                tableHtml += '</tr>';
+            });
+
+            tableHtml += '</tbody></table>';
+            return tableHtml;
+        }
+    </script>
+</body>
+</html>

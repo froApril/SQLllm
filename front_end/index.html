@@ -57,6 +57,20 @@
 
         }
 
+        .closeModalButton {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        
+        .closeModalButton:hover,
+        .closeModalButton:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
         /* 修改CSS样式 */
         #chatContainer {
             margin-top: 20px;
@@ -105,8 +119,18 @@
 <body>
     <div id="navbar">
         <button id="loginButton">Login</button>
+        <button id="guideButton">User Guide</button>
     </div>
-
+    <div id="userGuideModal" class="modal">
+        <div class="modal-content">
+            <span id="closeUserGuideModal" class="closeModalButton">&times;</span>
+            <h2>User Guide</h2>
+            <div id="userGuideContent">
+                <!-- Your content will go here -->
+            </div>
+        </div>
+    </div>
+    
     <!-- Login Modal -->
     <div id="loginModal" class="modal">
         <div class="modal-content">
@@ -211,6 +235,7 @@
         const confirmLoginButton = document.getElementById("confirmLogin");
         const loginUsername = document.getElementById("loginUsername");
         const loginPassword = document.getElementById("loginPassword");
+        const checkuserstate = 1 ;
 
         loginButton.addEventListener("click", () => {
             loginModal.style.display = "block";
@@ -233,7 +258,9 @@
             signupModal.style.display = "none";
             loginModal.style.display = "block";
         });
-
+        confirmButton.addEventListener("click", () => {
+            // 点击确定按钮后的操作
+        });
 
         connectButton.addEventListener("click", () => {
             // 弹出数据库连接输入窗口
@@ -307,7 +334,15 @@
                         return response.json();
                     })
                     .then(data => {
+                        console.log(data);
                         alert(data.resultData);
+
+
+
+
+                        document.getElementById('loginModal').style.display = "none";
+
+                        //window.location.href = "admi.html"; // Navigate to admi.html
                     })
                     .catch(error => {
                         console.error('There has been a problem with your fetch operation:', error);
@@ -318,6 +353,27 @@
             }
         });
 
+        // show user guide
+        document.addEventListener('DOMContentLoaded', (event) => {
+            const guideButton = document.getElementById("guideButton");
+            const userGuideModal = document.getElementById("userGuideModal");
+            const closeUserGuideModalButton = document.getElementById("closeUserGuideModal");
+        
+            guideButton.addEventListener("click", () => {
+                userGuideModal.style.display = "block";
+            });
+        
+            closeUserGuideModalButton.addEventListener("click", () => {
+                userGuideModal.style.display = "none";
+            });
+        
+            window.addEventListener("click", (event) => {
+                if (event.target == userGuideModal) {
+                    userGuideModal.style.display = "none";
+                }
+            });
+        });
+        
 
         //switchdatabase
         document.getElementById('connectDatabase').addEventListener('click', function () {
@@ -474,39 +530,7 @@
                 document.getElementById('tableDetails').innerText = '';  // Clear the details div
             }
         });
-
-
-        //        connectDatabaseButton.addEventListener("click", () => {
-        //          // 获取用户输入的数据库连接信息
-        //            const host = document.getElementById("host").value;
-        //          const username = document.getElementById("username").value;
-        //        const password = document.getElementById("password").value;
-        //      const database = document.getElementById("database").value;
-        //
-        // 连接数据库的代码应该在后端实现，这里只是一个示例
-        //           console.log(`Host: ${host}, Username: ${username}, Password: ${password}, Database: ${database}`);
-
-        // 关闭输入窗口
-        //       modal.style.display = "none";
-        //         tableList.style.display = "block"; // 显示表格列表
-        // });
-
-        //not used yet
-        selectButton.addEventListener("click", () => {
-            const selectedTable = document.querySelector('input[name="table"]:checked');
-            if (!selectedTable) {
-                alert("请至少选择一个表格。");
-            } else {
-                // 在这里可以获取用户选择的表格，并显示表格的具体内容（示例数据）
-                const selectedTableName = selectedTable.value;
-                tableContent.style.display = "block";
-            }
-        });
-
-        confirmButton.addEventListener("click", () => {
-            // 点击确定按钮后的操作
-        });
-
+        
 
         //chat part
         sendMessageButton.addEventListener("click", () => {
