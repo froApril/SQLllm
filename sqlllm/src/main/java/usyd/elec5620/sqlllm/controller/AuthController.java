@@ -45,7 +45,7 @@ public class AuthController {
     }
 
 
-    @GetMapping("/login")
+    @PostMapping("/login")
     public Object login(@RequestBody User user, HttpSession session) throws Exception {
         String newDsKey = System.currentTimeMillis() + "";
         this.tableMapper = (TableMapper) JdkParamDsMethodProxy.createProxyInstance(tableMapper, newDsKey, DynamicDataSourceConfig.userDb);
