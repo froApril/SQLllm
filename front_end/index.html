@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>数据库连接示例</title>
+    <title>Database</title>
     <style>
         /* 添加你的CSS样式 */
         #startContainer {
@@ -142,35 +142,36 @@
 
 
     <div id="startContainer">
-        <button id="connectButton">连接数据库</button>
-        <button id="confirmButton" disabled>确定</button>
+        <button id="connectButton">Connect to Database</button>
+        <button id="confirmButton" disabled>Confirm</button>
+        <button id="resetDatabaseButton">Reset Database</button>
     </div>
 
     <!-- 模态对话框 -->
     <div id="myModal" class="modal">
         <div class="modal-content">
             <span id="closeModal">&times;</span>
-            <h2>数据库连接信息</h2>
+            <h2>Connecting Info</h2>
             <label for="ip">IP:</label>
-            <input type="text" id="ip" placeholder="请输入IP"><br>
+            <input type="text" id="ip" placeholder="input IP"><br>
             <label for="port">Port:</label>
-            <input type="text" id="port" placeholder="请输入Port"><br>
+            <input type="text" id="port" placeholder="input Port"><br>
             <label for="dbName">Database Name:</label>
-            <input type="text" id="dbName" placeholder="请输入Database Name"><br>
+            <input type="text" id="dbName" placeholder="input Database Name"><br>
             <label for="driveClassName">Drive Class Name:</label>
-            <input type="text" id="driveClassName" placeholder="请输入Drive Class Name"><br>
+            <input type="text" id="driveClassName" placeholder="input Drive Class Name"><br>
             <label for="username">Username:</label>
-            <input type="text" id="username" placeholder="请输入Username"><br>
+            <input type="text" id="username" placeholder="input Username"><br>
             <label for="password">Password:</label>
-            <input type="password" id="password" placeholder="请输入Password"><br>
+            <input type="password" id="password" placeholder="input Password"><br>
 
-            <button id="connectDatabase">确定</button>
+            <button id="connectDatabase">Confirm</button>
 
         </div>
     </div>
 
 
-    <button id="showDefaultDatabase">Show Default Database</button>
+    <button id="showDefaultDatabase">Show Database</button>
     <select id="tableDropdown"></select>
     <div id="tableDetails"></div>
 
@@ -178,8 +179,8 @@
     <div id="chatContainer">
         <div id="chatOutput"></div>
         <div id="chatInput">
-            <input type="text" id="messageInput" placeholder="输入消息...">
-            <button id="sendMessage">发送</button>
+            <input type="text" id="messageInput" placeholder="Input...">
+            <button id="sendMessage">Send</button>
         </div>
     </div>
 
@@ -316,6 +317,8 @@
                 alert("Please enter both username and password.");
             }
         });
+
+
         //switchdatabase
         document.getElementById('connectDatabase').addEventListener('click', function () {
             let ipValue = document.getElementById('ip').value;
@@ -344,10 +347,8 @@
                 .then(response => response.json())
                 .then(data => {
                     alert(data.resultData);
-                    //               if (data.resultData.includes("successfully")) {
-                    // Close the modal if the connection was successful
-                    //                    document.getElementById('myModal').style.display = "none";
-                    //              }
+                    document.getElementById('myModal').style.display = "none"; // Add this line to close the modal
+                    //document.getElementById('tableDetails').style.display = 'none';
                 })
                 .catch(error => {
                     console.error('Error:', error);
@@ -355,8 +356,36 @@
                 });
         });
 
+        //reset database
+        document.getElementById('resetDatabaseButton').addEventListener('click', function () {
+            fetch('http://localhost:8080/reset', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok ' + response.statusText);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    alert(data.resultData);
+                    //document.getElementById('tableDetails').innerHTML = '';  // Clear the table
+                    // Or, if you want to hide it instead:
+                    //document.getElementById('tableDetails').style.display = 'none';
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred while resetting the database. Please try again.');
+                });
+        });
 
-        //connectdefaultdatabase
+
+
+
+        //connectdatabase
         document.getElementById('showDefaultDatabase').addEventListener('click', function () {
 
             fetch('http://localhost:8080/table/', {
@@ -388,7 +417,7 @@
         });
 
 
-        //showdefaultdatabase
+        //showdatabase
         document.getElementById('tableDropdown').addEventListener('change', async function () {
             let selectedTable = this.value;
 
@@ -410,14 +439,27 @@
 
                     const data = await response.json();
                     let columns = data.resultData.columns;
-                    console.log(columns);
+                    let rowData = data.resultData.data;
+
+                    console.log(data.resultData);
 
                     // Build an HTML table for the columns
                     let tableHtml = '<table border="1">';
-                    tableHtml += '<thead><tr><th>No.</th><th>Column Name</th></tr></thead><tbody>';
+                    tableHtml += '<thead><tr>';
 
-                    columns.forEach((columnName, index) => {
-                        tableHtml += `<tr><td>${index + 1}</td><td>${columnName}</td></tr>`;
+                    // Add column headers
+                    columns.slice(0, 5).forEach((columnName) => {
+                        tableHtml += `<th>${columnName}</th>`;
+                    });
+                    tableHtml += '</tr></thead><tbody>';
+
+                    // Add rows of data
+                    rowData.forEach((dataRow) => {
+                        tableHtml += '<tr>';
+                        columns.slice(0, 5).forEach((columnName) => {
+                            tableHtml += `<td>${dataRow[columnName] || ''}</td>`; // Display data if available, else empty cell
+                        });
+                        tableHtml += '</tr>';
                     });
 
                     tableHtml += '</tbody></table>';
@@ -448,7 +490,7 @@
         //       modal.style.display = "none";
         //         tableList.style.display = "block"; // 显示表格列表
         // });
-        
+
         //not used yet
         selectButton.addEventListener("click", () => {
             const selectedTable = document.querySelector('input[name="table"]:checked');
