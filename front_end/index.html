@@ -300,6 +300,7 @@
                     })
                     .then(data => {
                         alert(data.resultData);
+                        document.getElementById('signupModal').style.display = "none";
                     })
                     .catch(error => {
                         console.error('There has been a problem with your fetch operation:', error);
@@ -335,11 +336,8 @@
                     })
                     .then(data => {
                         console.log(data);
-                        alert(data.resultData);
-
-
-
-
+                        alert("login successfully !");
+                        window.localStorage.setItem('userId',JSON.stringify(data.resultData.userId));
                         document.getElementById('loginModal').style.display = "none";
 
                         //window.location.href = "admi.html"; // Navigate to admi.html

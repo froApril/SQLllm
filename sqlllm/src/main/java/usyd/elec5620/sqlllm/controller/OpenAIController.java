@@ -36,6 +36,7 @@ public class OpenAIController {
     public Object askAi(@RequestBody OpenAiRequest openAiRequest, HttpSession session) throws Exception{
         String newDsKey = System.currentTimeMillis() + "";
         this.tableMapper = (TableMapper) JdkParamDsMethodProxy.createProxyInstance(tableMapper, newDsKey, DynamicDataSourceConfig.userDb);
+        System.out.println(session.getId());
         String response = checkUserQueryTime(session);
         if (response.equals("No query times")) {
             return ResponseResult.error(response);
