@@ -51,8 +51,14 @@ public class AuthController {
         User target = tableMapper.searchUser(user.getUsername(), user.getPassword());
         System.out.println(target);
         if (target != null) {
+<<<<<<< HEAD
             target.setPassword("");
             return ResponseResult.success(target);
+=======
+            session.setAttribute("currentUser", target);
+            System.out.println(session.getId());
+            return ResponseResult.success("find user " + target.getUsername());
+>>>>>>> 6d23249a36d4e7a94832db37e9b8e7e2ffc76440
         }
         return ResponseResult.error("no such user");
     }

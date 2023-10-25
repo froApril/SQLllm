@@ -36,8 +36,20 @@ public class OpenAIController {
     public Object askAi(@RequestBody Map<String, String> obj) throws Exception{
         String newDsKey = System.currentTimeMillis() + "";
         this.tableMapper = (TableMapper) JdkParamDsMethodProxy.createProxyInstance(tableMapper, newDsKey, DynamicDataSourceConfig.userDb);
+<<<<<<< HEAD
         String username = obj.get("username");
         String askStr = obj.get("askStr");
+=======
+        System.out.println(session.getId());
+        String response = checkUserQueryTime(session);
+        if (response.equals("No query times")) {
+            return ResponseResult.error(response);
+        }
+        String reply = openAiService.send(openAiRequest.getAskStr());
+        openAiRequest.setReplyStr(reply);
+        return JSONUtil.toJsonStr(openAiRequest);
+    }
+>>>>>>> 6d23249a36d4e7a94832db37e9b8e7e2ffc76440
 
         User target = tableMapper.getUserByUsername(username);
         System.out.println(target);
