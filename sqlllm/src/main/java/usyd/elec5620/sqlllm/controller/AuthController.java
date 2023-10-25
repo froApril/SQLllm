@@ -70,26 +70,26 @@ public class AuthController {
     }
 
     @PostMapping("/addQueryTime")
-    public Object addQueryTime(HttpSession session) throws Exception {
+    public Object addQueryTime(@RequestBody Map<String, String> obj) throws Exception {
         String newDsKey = System.currentTimeMillis() + "";
         this.tableMapper = (TableMapper) JdkParamDsMethodProxy.createProxyInstance(tableMapper, newDsKey, DynamicDataSourceConfig.userDb);
-        User currentUser = (User) session.getAttribute("currentUser");
-        if (currentUser != null) {
-            currentUser.setTimes(currentUser.getTimes() + 1);
-            tableMapper.updateUser(currentUser);
+        User target = tableMapper.getUserByUsername(obj.get("username"));
+        if (target != null) {
+            target.setTimes(target.getTimes() + 1);
+            tableMapper.updateUser(target);
             return ResponseResult.success("user is updated");
         }
         return ResponseResult.error("no current user");
     }
 
     @PostMapping("/minusQueryTime")
-    public Object minusQueryTime(HttpSession session) throws Exception {
+    public Object minusQueryTime(@RequestBody Map<String, String> obj) throws Exception {
         String newDsKey = System.currentTimeMillis() + "";
         this.tableMapper = (TableMapper) JdkParamDsMethodProxy.createProxyInstance(tableMapper, newDsKey, DynamicDataSourceConfig.userDb);
-        User currentUser = (User) session.getAttribute("currentUser");
-        if (currentUser != null) {
-            currentUser.setTimes(currentUser.getTimes() - 1);
-            tableMapper.updateUser(currentUser);
+        User target = tableMapper.getUserByUsername(obj.get("username"));
+        if (target != null) {
+            target.setTimes(target.getTimes() - 1);
+            tableMapper.updateUser(target);
             return ResponseResult.success("user is updated");
         }
         return ResponseResult.error("no current user");
