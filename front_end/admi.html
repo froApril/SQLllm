@@ -131,15 +131,17 @@
             document.getElementById("minus-btn").addEventListener('click', (e) => {
                 console.log(e.target.value);
                 // todo
+                updateTimes(-1, e.target.value);
             })
             document.getElementById("add-btn").addEventListener('click', (e) => {
                 console.log(e.target.value);
+                updateTimes(1, e.target.value);
             })
         }
 
 
         
-        function updateTimes(delta, userId, userName) {
+        function updateTimes(delta,userName) {
             console.log(userName)
             const timesValueElement = document.getElementById('timesValue');
             let timesValue = parseInt(timesValueElement.textContent, 10);
@@ -156,6 +158,7 @@
             .then(response => response.json())
             .then(data => {
                 console.log('Success:', data);
+                alert("updated successfully!");
                 timesValueElement.textContent = timesValue;  // Update the displayed times value
             })
             .catch((error) => {

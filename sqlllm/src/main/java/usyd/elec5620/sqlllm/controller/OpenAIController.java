@@ -56,13 +56,15 @@ public class OpenAIController {
         return JSONUtil.toJsonStr(openAiRequest);
     }
 
+    @CrossOrigin
     @PostMapping("/askAi/sql")
     public Object askAiSqlQuery(@RequestBody Map<String, String> obj) throws Exception {
         String question = obj.get("sqlQuestion");
         String tableName = obj.get("tableName");
         String columns = obj.get("columns");
         String username = obj.get("username");
-        String prompt = question + "\n" + "in the table " + tableName + " with columns: " + columns;
+        String prompt = "Can you help me to construct a SQL command to " + question + "\n" + "in the table " + tableName + " with columns: " + columns;
+        System.out.println(prompt);
         String newDsKey = System.currentTimeMillis() + "";
         this.tableMapper = (TableMapper) JdkParamDsMethodProxy.createProxyInstance(tableMapper, newDsKey, DynamicDataSourceConfig.userDb);
 

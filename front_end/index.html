@@ -205,8 +205,12 @@
         <div id="chatInput">
             <input type="text" id="messageInput" placeholder="Input...">
             <button id="sendMessage">Send</button>
+            <button id="excuteMessage">Excute</button>
         </div>
     </div>
+
+    <div id="resulttableDetails"></div>
+    
 
     <script>
         // 添加JavaScript代码
@@ -220,6 +224,7 @@
         const connectDatabaseButton = document.getElementById("connectDatabase");
         const messageInput = document.getElementById("messageInput");
         const sendMessageButton = document.getElementById("sendMessage");
+        const excuteMessageButton = document.getElementById("excuteMessage");
         const chatOutput = document.getElementById("chatOutput");
         const loginButton = document.getElementById("loginButton");
         const loginModal = document.getElementById("loginModal");
@@ -466,7 +471,7 @@
                 .then(data => {
                     let tables = data.resultData;
                     let tableNames = tables.map(table => table.TABLE_NAME);
-
+                    console.log(tableNames);
                     let dropdown = document.getElementById('tableDropdown');
                     dropdown.innerHTML = '<option>Select a table</option>';  // Default option
                     tableNames.forEach(name => {
@@ -474,6 +479,7 @@
                         option.value = name;
                         option.textContent = name;
                         dropdown.appendChild(option);
+                        console.log(option.textContent);
                     });
                 })
                 .catch(error => {
@@ -486,7 +492,8 @@
         //showdatabase
         document.getElementById('tableDropdown').addEventListener('change', async function () {
             let selectedTable = this.value;
-
+            console.log(selectedTable);
+            localStorage.setItem('tableNAME',selectedTable);
             if (selectedTable !== 'Select a table') {
                 try {
                     // Add the tableName as a query parameter
@@ -506,9 +513,8 @@
                     const data = await response.json();
                     let columns = data.resultData.columns;
                     let rowData = data.resultData.data;
-
-                    console.log(data.resultData);
-
+                    console.log(columns);
+                    localStorage.setItem('columnNAME',columns);
                     // Build an HTML table for the columns
                     let tableHtml = '<table border="1">';
                     tableHtml += '<thead><tr>';
@@ -541,7 +547,7 @@
             }
         });
         
-
+        
         //chat part
         sendMessageButton.addEventListener("click", () => {
             const message = messageInput.value.trim();
@@ -553,7 +559,9 @@
                         // Remove the loading message
                         chatOutput.removeChild(chatOutput.lastChild);
                         if (response.replyStr) {
-                            displayBackendMessage(response.replyStr);
+                            
+                            displayBackendMessage(extractAndFormatString(response.replyStr));
+                            localStorage.setItem('sqlQuery',extractAndFormatString(response.replyStr));
                         } else {
                             displayBackendMessage("Sorry, I couldn't understand that.");
                         }
@@ -568,6 +576,23 @@
                 messageInput.value = "";
             }
         });
+
+        excuteMessageButton.addEventListener("click",() =>{
+            const message = localStorage.getItem("sqlQuery");
+            if(message){
+                sendExcuteRequest(message)
+                    
+            }
+        });
+
+        function extractAndFormatString(input) {
+            console.log(input);
+            const matches = input.match(/```sql\n([\s\S]*?)\n```/);
+            if (matches && matches[1]) {
+              return matches[1].replace(/\n/g, ' ');
+            }
+            return "Couldn't find the content";
+        }
 
         //chat part
         function displayUserMessage(message) {
@@ -592,6 +617,8 @@
             chatOutput.appendChild(backendMessageElement);
         }
 
+
+        
         //chat part
         async function sendPostRequest(message) {
             if (localStorage.getItem("currentUser") == null) {
@@ -600,14 +627,16 @@
                 }
                 if (localStorage.getItem("guest") > 0) {
                     try {
-                        const response = await fetch('http://localhost:8080/askAi', {
+                        const response = await fetch('http://localhost:8080/askAi/sql', {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json'
                             },
                             body: JSON.stringify({ 
-                                askStr: message,
-                                username: localStorage.getItem("username")
+                                sqlQuestion: message,
+                                tableName: localStorage.getItem("tableNAME"),
+                                columns: localStorage.getItem("columnNAME"),
+                                username: localStorage.getItem("username"),
                              })
                         });
 
@@ -630,14 +659,19 @@
             } else {
                 try {
                     console.log(localStorage.getItem("username"))
-                    const response = await fetch('http://localhost:8080/askAi', {
+                    console.log(localStorage.getItem("tableNAME"))
+                    console.log(localStorage.getItem("columnNAME"))
+                    
+                    const response = await fetch('http://localhost:8080/askAi/sql', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json'
                         },
                         body: JSON.stringify({ 
-                            askStr: message,
-                            username: localStorage.getItem("username")
+                            sqlQuestion: message,
+                            tableName: localStorage.getItem("tableNAME"),
+                            columns: localStorage.getItem("columnNAME"),
+                            username: localStorage.getItem("username"),
                          })
                     });
 
@@ -654,6 +688,67 @@
                 }
             }
         }
+
+        async function sendExcuteRequest(message){
+            const response = await fetch('http://localhost:8080/execute', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ 
+                    sql: message,
+                 })
+            });
+
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+
+            const data = await response.json();
+            console.log(data);
+            generateTable(data) ;
+                    //let columns = data.resultData.columns;
+                    //let rowData = data.resultData.data;
+                    //console.log(columns);
+                    //localStorage.setItem('columnNAME',columns);
+                    // Build an HTML table for the columns      
+        }
+
+            function generateTable(data) {
+                if (!data || !data.length) return 'No data available';
+        
+                // Dynamically get the headers based on the first object's keys
+                const headers = Object.keys(data[0]);
+                let tableHtml = '<table>';
+                
+                // Generate table headers
+                tableHtml += '<thead><tr>';
+                headers.forEach(header => {
+                    tableHtml += `<th>${capitalize(header)}</th>`;
+                });
+                tableHtml += '</tr></thead>';
+                
+                // Generate table rows
+                tableHtml += '<tbody>';
+                data.forEach(row => {
+                    tableHtml += '<tr>';
+                    headers.forEach(header => {
+                        tableHtml += `<td>${row[header]}</td>`;
+                    });
+                    tableHtml += '</tr>';
+                });
+                tableHtml += '</tbody></table>';
+                document.getElementById('resulttableDetails').innerHTML = tableHtml;
+            }
+        
+            // Helper function to capitalize the first letter of a string
+            function capitalize(str) {
+                return str.charAt(0).toUpperCase() + str.slice(1);
+            }
+        
+            
+
+        
 
     </script>
 </body>

@@ -89,6 +89,7 @@ public class DataBaseController {
         return ResponseResult.success(res);
     }
 
+    @CrossOrigin
     @PostMapping("/execute")
     public Object executeSql(@RequestBody Map<String, String> obj) {
         try {
