@@ -104,8 +104,6 @@
                         if (user,usern) {
                             //document.getElementById('settingModal').style.display = "none";
                             openSettingsModal(user,usern);
-
-        
         
                         }
                     }
@@ -125,12 +123,21 @@
             modal.innerHTML = `
                 <div id="settingModal">
                     <p>Times: <span id="timesValue">${user.times}</span></p>
-                    <button classname = "minus-btn" id = ${user.username}>Minus</button>
-                    <button class = "add-btn">Add</button>
+                    <button id = minus-btn value = ${user.username}>Minus</button>
+                    <button id = add-btn value = ${user.username}>Add</button>
                 </div>
             `;
             document.body.appendChild(modal);
+            document.getElementById("minus-btn").addEventListener('click', (e) => {
+                console.log(e.target.value);
+                // todo
+            })
+            document.getElementById("add-btn").addEventListener('click', (e) => {
+                console.log(e.target.value);
+            })
         }
+
+
         
         function updateTimes(delta, userId, userName) {
             console.log(userName)
@@ -144,7 +151,6 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ 
                     username: userName ,
-                    username: localStorage.getItem("username")
                 })
             })
             .then(response => response.json())
