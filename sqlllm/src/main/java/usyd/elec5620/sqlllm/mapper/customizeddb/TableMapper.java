@@ -40,4 +40,7 @@ public interface TableMapper extends BaseMapper<Object> {
 
     @Select("select * from user")
     List<User> allUser();
+
+    @Select("select * from user where username = #{username}")
+    User getUserByUsername(@Param("username") String username);
 }

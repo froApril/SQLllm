@@ -45,28 +45,26 @@ public class AuthController {
 
     @CrossOrigin
     @PostMapping("/login")
-    public Object login(@RequestBody User user, HttpSession session) throws Exception {
+    public Object login(@RequestBody User user) throws Exception {
         String newDsKey = System.currentTimeMillis() + "";
         this.tableMapper = (TableMapper) JdkParamDsMethodProxy.createProxyInstance(tableMapper, newDsKey, DynamicDataSourceConfig.userDb);
         User target = tableMapper.searchUser(user.getUsername(), user.getPassword());
+        System.out.println(target);
         if (target != null) {
-            session.setAttribute("currentUser", target);
-            return ResponseResult.success("find user " + target.getUsername());
+            target.setPassword("");
+            return ResponseResult.success(target);
         }
         return ResponseResult.error("no such user");
     }
 
     @GetMapping("/users")
-    public Object getAllUserInfo(HttpSession session) throws Exception {
-        if (session.getAttribute("currentUser") == null) {
-            return ResponseResult.error("Please login");
-        }
-        User currentUser = (User) session.getAttribute("currentUser");
+    public Object getAllUserInfo(@RequestBody User user) throws Exception {
+        String newDsKey = System.currentTimeMillis() + "";
+        this.tableMapper = (TableMapper) JdkParamDsMethodProxy.createProxyInstance(tableMapper, newDsKey, DynamicDataSourceConfig.userDb);
+        User currentUser = tableMapper.getUserByUsername(user.getUsername());
         if (currentUser.getType() != 0) {
             return ResponseResult.error("You are not admin");
         }
-        String newDsKey = System.currentTimeMillis() + "";
-        this.tableMapper = (TableMapper) JdkParamDsMethodProxy.createProxyInstance(tableMapper, newDsKey, DynamicDataSourceConfig.userDb);
         List<User> users = tableMapper.allUser();
         return ResponseResult.success(users);
     }

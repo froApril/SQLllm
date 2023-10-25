@@ -33,58 +33,45 @@ public class OpenAIController {
 
     @CrossOrigin
     @PostMapping("/askAi")
-    public Object askAi(@RequestBody OpenAiRequest openAiRequest, HttpSession session) throws Exception{
+    public Object askAi(@RequestBody Map<String, String> obj) throws Exception{
         String newDsKey = System.currentTimeMillis() + "";
         this.tableMapper = (TableMapper) JdkParamDsMethodProxy.createProxyInstance(tableMapper, newDsKey, DynamicDataSourceConfig.userDb);
-        String response = checkUserQueryTime(session);
-        if (response.equals("No query times")) {
-            return ResponseResult.error(response);
+        String username = obj.get("username");
+        String askStr = obj.get("askStr");
+
+        User target = tableMapper.getUserByUsername(username);
+        System.out.println(target);
+        if (target.getTimes() > 0) {
+            target.setTimes(target.getTimes() - 1);
+            tableMapper.updateUser(target);
+        } else {
+            return ResponseResult.error("No query times");
         }
-        String reply = openAiService.send(openAiRequest.getAskStr());
+        OpenAiRequest openAiRequest = new OpenAiRequest();
+        String reply = openAiService.send(askStr);
         openAiRequest.setReplyStr(reply);
+        openAiRequest.setAskStr(askStr);
         return JSONUtil.toJsonStr(openAiRequest);
     }
 
-    private String checkUserQueryTime(HttpSession session) throws Exception{
-        String newDsKey = System.currentTimeMillis() + "";
-        this.tableMapper = (TableMapper) JdkParamDsMethodProxy.createProxyInstance(tableMapper, newDsKey, DynamicDataSourceConfig.userDb);
-        User currentUser = (User) session.getAttribute("currentUser");
-        if (currentUser == null) {
-            if (session.getAttribute("query_time") != null) {
-                int guest_query_time = (int)session.getAttribute("query_time");
-                if (guest_query_time == 0) {
-                    return "No query times";
-                } else {
-                    session.setAttribute("query_time", guest_query_time - 1);
-                }
-            } else {
-                session.setAttribute("query_time", 3);
-            }
-        } else {
-            int user_query_time = currentUser.getTimes();
-            if (user_query_time == 0) {
-                return "No query times";
-            } else {
-                // update user
-                currentUser.setTimes(user_query_time - 1);
-                tableMapper.updateUser(currentUser);
-            }
-        }
-        return "ok";
-    }
-
     @PostMapping("/askAi/sql")
-    public Object askAiSqlQuery(@RequestBody Map<String, String> obj, HttpSession session) throws Exception {
+    public Object askAiSqlQuery(@RequestBody Map<String, String> obj) throws Exception {
         String question = obj.get("sqlQuestion");
         String tableName = obj.get("tableName");
         String columns = obj.get("columns");
+        String username = obj.get("username");
         String prompt = question + "\n" + "in the table " + tableName + " with columns: " + columns;
-        System.out.println(prompt);
+        String newDsKey = System.currentTimeMillis() + "";
+        this.tableMapper = (TableMapper) JdkParamDsMethodProxy.createProxyInstance(tableMapper, newDsKey, DynamicDataSourceConfig.userDb);
 
-        String response = checkUserQueryTime(session);
-        if (response.equals("No query times")) {
-            return ResponseResult.error(response);
+        User target = tableMapper.getUserByUsername(username);
+        if (target.getTimes() > 0) {
+            target.setTimes(target.getTimes() - 1);
+            tableMapper.updateUser(target);
+        } else {
+            return ResponseResult.error("No query times");
         }
+
         String reply = openAiService.send(prompt);
         OpenAiRequest pair = new OpenAiRequest();
         pair.setAskStr(prompt);
