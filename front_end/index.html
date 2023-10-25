@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Database</title>
     <style>
-        /* 添加你的CSS样式 */
+
         #startContainer {
             text-align: center;
         }
@@ -36,7 +36,7 @@
             background-color: #f2f2f2;
         }
 
-        /* 模态对话框样式 */
+     
         .modal {
             display: none;
             position: fixed;
@@ -71,7 +71,7 @@
             cursor: pointer;
         }
 
-        /* 修改CSS样式 */
+
         #chatContainer {
             margin-top: 20px;
             padding: 10px;
@@ -94,7 +94,6 @@
 
         #messageInput {
             width: 70vw;
-            /* 让输入框自动扩展以占据剩余的宽度 */
             padding: 8px;
             border: 1px solid #ccc;
             border-radius: 5px;
@@ -126,12 +125,12 @@
             <span id="closeUserGuideModal" class="closeModalButton">&times;</span>
             <h2>User Guide</h2>
             <div id="userGuideContent">
-                <!-- Your content will go here -->
+                
             </div>
         </div>
     </div>
     
-    <!-- Login Modal -->
+
     <div id="loginModal" class="modal">
         <div class="modal-content">
             <span id="closeLoginModal">&times;</span>
@@ -145,7 +144,7 @@
         </div>
     </div>
 
-    <!-- Signup Modal (initially hidden) -->
+
     <div id="signupModal" class="modal" style="display: none;">
         <div class="modal-content">
             <span id="closeSignupModal">&times;</span>
@@ -171,7 +170,7 @@
         <button id="resetDatabaseButton">Reset Database</button>
     </div>
 
-    <!-- 模态对话框 -->
+
     <div id="myModal" class="modal">
         <div class="modal-content">
             <span id="closeModal">&times;</span>
@@ -199,21 +198,21 @@
     <select id="tableDropdown"></select>
     <div id="tableDetails"></div>
 
-    <!-- 聊天输入框和聊天输出区域 -->
+
     <div id="chatContainer">
         <div id="chatOutput"></div>
         <div id="chatInput">
             <input type="text" id="messageInput" placeholder="Input...">
             <button id="sendMessage">Send</button>
-            <button id="excuteMessage">Excute</button>
+            <button id="excuteMessage">Execute</button>
         </div>
     </div>
 
-    <div id="resulttableDetails"></div>
+    <div id="tableContainer"></div>
     
 
     <script>
-        // 添加JavaScript代码
+
         const connectButton = document.getElementById("connectButton");
         const confirmButton = document.getElementById("confirmButton");
         const tableList = document.getElementById("tableList");
@@ -443,9 +442,7 @@
                 })
                 .then(data => {
                     alert(data.resultData);
-                    //document.getElementById('tableDetails').innerHTML = '';  // Clear the table
-                    // Or, if you want to hide it instead:
-                    //document.getElementById('tableDetails').style.display = 'none';
+
                 })
                 .catch(error => {
                     console.error('Error:', error);
@@ -496,7 +493,7 @@
             localStorage.setItem('tableNAME',selectedTable);
             if (selectedTable !== 'Select a table') {
                 try {
-                    // Add the tableName as a query parameter
+ 
                     const response = await fetch(`http://localhost:8080/table/info`, {
                         method: 'POST',
                         headers: {
@@ -519,13 +516,11 @@
                     let tableHtml = '<table border="1">';
                     tableHtml += '<thead><tr>';
 
-                    // Add column headers
                     columns.slice(0, 5).forEach((columnName) => {
                         tableHtml += `<th>${columnName}</th>`;
                     });
                     tableHtml += '</tr></thead><tbody>';
 
-                    // Add rows of data
                     rowData.forEach((dataRow) => {
                         tableHtml += '<tr>';
                         columns.slice(0, 5).forEach((columnName) => {
@@ -572,7 +567,6 @@
                         chatOutput.removeChild(chatOutput.lastChild);
                         // displayBackendMessage("An error occurred while trying to send your message.");
                     });
-                // 清空输入框
                 messageInput.value = "";
             }
         });
@@ -587,7 +581,7 @@
 
         function extractAndFormatString(input) {
             console.log(input);
-            const matches = input.match(/```sql\n([\s\S]*?)\n```/);
+            const matches = input.match(/```sql\n([\s\S]*?)```/);
             if (matches && matches[1]) {
               return matches[1].replace(/\n/g, ' ');
             }
@@ -704,47 +698,43 @@
                 throw new Error('Network response was not ok');
             }
 
+
             const data = await response.json();
-            console.log(data);
-            generateTable(data) ;
-                    //let columns = data.resultData.columns;
-                    //let rowData = data.resultData.data;
-                    //console.log(columns);
-                    //localStorage.setItem('columnNAME',columns);
-                    // Build an HTML table for the columns      
+                if (data.success && Array.isArray(data.resultData)) {
+                    const tableContainer = document.getElementById('tableContainer');
+                    tableContainer.innerHTML = generateDynamicTable(data.resultData);
+                } else {
+                    console.error('Failed to fetch data:', data);
+                    document.getElementById('tableContainer').textContent = 'Failed to fetch data. Please check the console for errors.';
+                }     
         }
 
-            function generateTable(data) {
-                if (!data || !data.length) return 'No data available';
-        
-                // Dynamically get the headers based on the first object's keys
-                const headers = Object.keys(data[0]);
-                let tableHtml = '<table>';
-                
-                // Generate table headers
-                tableHtml += '<thead><tr>';
-                headers.forEach(header => {
-                    tableHtml += `<th>${capitalize(header)}</th>`;
-                });
-                tableHtml += '</tr></thead>';
-                
-                // Generate table rows
-                tableHtml += '<tbody>';
-                data.forEach(row => {
-                    tableHtml += '<tr>';
-                    headers.forEach(header => {
-                        tableHtml += `<td>${row[header]}</td>`;
-                    });
-                    tableHtml += '</tr>';
-                });
-                tableHtml += '</tbody></table>';
-                document.getElementById('resulttableDetails').innerHTML = tableHtml;
+        function generateDynamicTable(data) {
+            if (!Array.isArray(data) || data.length === 0) {
+                return "No data available";
             }
-        
-            // Helper function to capitalize the first letter of a string
-            function capitalize(str) {
-                return str.charAt(0).toUpperCase() + str.slice(1);
-            }
+
+            let tableHtml = '<table border="1"><thead><tr>';
+            
+            // Generate table headers
+            const headers = Object.keys(data[0]);
+            headers.forEach(header => {
+                tableHtml += `<th>${header}</th>`;
+            });
+            tableHtml += '</tr></thead><tbody>';
+
+            // Generate table rows
+            data.forEach(row => {
+                tableHtml += '<tr>';
+                Object.values(row).forEach(value => {
+                    tableHtml += `<td>${value}</td>`;
+                });
+                tableHtml += '</tr>';
+            });
+
+            tableHtml += '</tbody></table>';
+            return tableHtml;
+        }
         
             
 
