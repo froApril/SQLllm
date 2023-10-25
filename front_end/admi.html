@@ -1,38 +1,68 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Panel</title>
 </head>
+
 <body>
     <div id="tableDetails">
         <h1>User Management</h1>
-        <div id="tableContainer"></div>
+        <div id="tableContainer">
+            
+        </div>
     </div>
 
     <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            fetch('http://localhost:8080/users')
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    console.log(data);
-                    const users = data.resultData;
-                    const tableContainer = document.getElementById('tableContainer');
-                    tableContainer.innerHTML = generateTable(users);
-                })
-                .catch(error => {
-                    console.error('Error fetching user data:', error);
-                    alert('Failed to fetch user data. Please check the console for errors.');
-                });
-        });
+        const users=[] ; 
 
+        document.addEventListener("DOMContentLoaded", () => {
+            const tableContainer = document.getElementById('tableContainer');
+            let users = []; // Define users array in a broader scope
+        
+            if (tableContainer) {
+                tableContainer.addEventListener('click', function(event) {
+                    if (event.target.classList.contains('settings-btn')) {
+                        const userId = event.target.dataset.userId;
+                        const user = users.find(u => u.id == userId);
+                        if (user) {
+                            openSettingsModal(user);
+                        }
+                    }
+                });
+            } else {
+                console.error("Element with ID 'tableContainer' was not found.");
+            }
+        
+            fetch('http://localhost:8080/users', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    username: localStorage.getItem("username")
+                })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log(data);
+                users = data.resultData; // Assign the fetched data to users
+                tableContainer.innerHTML = generateTable(users);
+            })
+            .catch(error => {
+                console.error('Error fetching user data:', error);
+                alert('Failed to fetch user data. Please check the console for errors.');
+            });
+        });
+        
         function generateTable(users) {
             let tableHtml = '<table border="1">';
             tableHtml += '<thead><tr>';
@@ -41,19 +71,91 @@
                 tableHtml += `<th>${header}</th>`;
             });
             tableHtml += '</tr></thead><tbody>';
-
+        
             users.forEach(user => {
                 tableHtml += '<tr>';
                 Object.values(user).forEach(value => {
                     tableHtml += `<td>${value}</td>`;
                 });
-                tableHtml += '<td><button>Settings</button></td>';
+                tableHtml += `<td><button data-user-id="${user.id}" class="settings-btn">Settings</button></td>`;
                 tableHtml += '</tr>';
             });
-
+        
             tableHtml += '</tbody></table>';
             return tableHtml;
         }
+        
+        
+
+        document.addEventListener("DOMContentLoaded", () => {
+            const tableContainer = document.getElementById('tableContainer');
+            console.log(tableContainer);
+            if (tableContainer) {
+                tableContainer.addEventListener('click', function(event) {
+                    if (event.target.classList.contains('settings-btn')) {
+                        const userId = event.target.dataset.userId;
+                        const user = users.find(u => u.id == userId);
+                        if (user) {
+                            //document.getElementById('settingModal').style.display = "none";
+                            openSettingsModal(user);
+                        }
+                    }
+                });
+            } else {
+                console.error("Element with ID 'tableContainer' was not found.");
+            }
+        });
+        
+
+        
+        
+        
+        
+
+        function openSettingsModal(user) {
+            console.log(user);
+            const modal = document.createElement('div');
+            modal.className = 'settings-modal';
+            modal.innerHTML = `
+                <div id="settingModal">
+                    <p>Times: <span id="timesValue">${user.times}</span></p>
+                    <button onclick="updateTimes(-1, ${user.id})">Minus</button>
+                    <button onclick="updateTimes(1, ${user.id})">Add</button>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        }
+        
+        function updateTimes(delta, userId) {
+            const timesValueElement = document.getElementById('timesValue');
+            let timesValue = parseInt(timesValueElement.textContent, 10);
+            timesValue = Math.max(0, timesValue + delta);
+        
+            const url = delta > 0 ? 'http://localhost:8080/addQueryTime' : 'http://localhost:8080/minusQueryTime';
+            fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userId, timesValue })
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Success:', data);
+                timesValueElement.textContent = timesValue;  // Update the displayed times value
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+            });
+        }
+        
+
+        
+
+
+
+
+
+
     </script>
 </body>
+
 </html>

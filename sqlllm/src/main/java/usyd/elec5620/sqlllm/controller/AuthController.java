@@ -57,11 +57,12 @@ public class AuthController {
         return ResponseResult.error("no such user");
     }
 
-    @GetMapping("/users")
-    public Object getAllUserInfo(@RequestBody User user) throws Exception {
+    @CrossOrigin
+    @PostMapping("/users")
+    public Object getAllUserInfo(@RequestBody Map<String, String> obj) throws Exception {
         String newDsKey = System.currentTimeMillis() + "";
         this.tableMapper = (TableMapper) JdkParamDsMethodProxy.createProxyInstance(tableMapper, newDsKey, DynamicDataSourceConfig.userDb);
-        User currentUser = tableMapper.getUserByUsername(user.getUsername());
+        User currentUser = tableMapper.getUserByUsername(obj.get("username"));
         if (currentUser.getType() != 0) {
             return ResponseResult.error("You are not admin");
         }
@@ -82,6 +83,7 @@ public class AuthController {
         return ResponseResult.error("no current user");
     }
 
+    
     @PostMapping("/minusQueryTime")
     public Object minusQueryTime(HttpSession session) throws Exception {
         String newDsKey = System.currentTimeMillis() + "";

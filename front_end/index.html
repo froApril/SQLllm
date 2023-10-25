@@ -336,14 +336,13 @@
                     })
                     .then(data => {
                         console.log(data);
-<<<<<<< HEAD
-                        alert(data.resultData);
-                        localStorage.setItem("currentUser", "user")
-=======
                         alert("login successfully !");
-                        window.localStorage.setItem('userId',JSON.stringify(data.resultData.userId));
->>>>>>> 6d23249a36d4e7a94832db37e9b8e7e2ffc76440
+                        localStorage.setItem("currentUser", "user")
+                        localStorage.setItem('username',data.resultData.username);
                         document.getElementById('loginModal').style.display = "none";
+                        if(data.resultData.type == 0){
+                            window.location.href = "admi.html";
+                        }
                         //window.location.href = "admi.html"; // Navigate to admi.html
                     })
                     .catch(error => {
@@ -606,7 +605,10 @@
                             headers: {
                                 'Content-Type': 'application/json'
                             },
-                            body: JSON.stringify({ askStr: message })
+                            body: JSON.stringify({ 
+                                askStr: message,
+                                username: localStorage.getItem("username")
+                             })
                         });
 
                         if (!response.ok) {
@@ -627,12 +629,16 @@
                 }
             } else {
                 try {
+                    console.log(localStorage.getItem("username"))
                     const response = await fetch('http://localhost:8080/askAi', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json'
                         },
-                        body: JSON.stringify({ askStr: message })
+                        body: JSON.stringify({ 
+                            askStr: message,
+                            username: localStorage.getItem("username")
+                         })
                     });
 
                     if (!response.ok) {
