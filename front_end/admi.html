@@ -28,8 +28,12 @@
                     if (event.target.classList.contains('settings-btn')) {
                         const userId = event.target.dataset.userId;
                         const user = users.find(u => u.id == userId);
+                        const userName = event.target.dataset.userName;
+                        const usern = users.find(u => u.username == userName);
+                        console.log(user);
+                        console.log(usern);
                         if (user) {
-                            openSettingsModal(user);
+                            openSettingsModal(user,usern);
                         }
                     }
                 });
@@ -95,9 +99,14 @@
                     if (event.target.classList.contains('settings-btn')) {
                         const userId = event.target.dataset.userId;
                         const user = users.find(u => u.id == userId);
-                        if (user) {
+                        const userName = event.target.dataset.userName;
+                        const usern = users.find(u => u.username == userName);
+                        if (user,usern) {
                             //document.getElementById('settingModal').style.display = "none";
-                            openSettingsModal(user);
+                            openSettingsModal(user,usern);
+
+        
+        
                         }
                     }
                 });
@@ -106,36 +115,37 @@
             }
         });
         
-
-        
-        
-        
         
 
-        function openSettingsModal(user) {
-            console.log(user);
+        function openSettingsModal(user,usern) {
+            console.log(user.username);
+            console.log(usern);
             const modal = document.createElement('div');
             modal.className = 'settings-modal';
             modal.innerHTML = `
                 <div id="settingModal">
                     <p>Times: <span id="timesValue">${user.times}</span></p>
-                    <button onclick="updateTimes(-1, ${user.id})">Minus</button>
-                    <button onclick="updateTimes(1, ${user.id})">Add</button>
+                    <button classname = "minus-btn" id = ${user.username}>Minus</button>
+                    <button class = "add-btn">Add</button>
                 </div>
             `;
             document.body.appendChild(modal);
         }
         
-        function updateTimes(delta, userId) {
+        function updateTimes(delta, userId, userName) {
+            console.log(userName)
             const timesValueElement = document.getElementById('timesValue');
             let timesValue = parseInt(timesValueElement.textContent, 10);
             timesValue = Math.max(0, timesValue + delta);
-        
+            
             const url = delta > 0 ? 'http://localhost:8080/addQueryTime' : 'http://localhost:8080/minusQueryTime';
             fetch(url, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ userId, timesValue })
+                body: JSON.stringify({ 
+                    username: userName ,
+                    username: localStorage.getItem("username")
+                })
             })
             .then(response => response.json())
             .then(data => {

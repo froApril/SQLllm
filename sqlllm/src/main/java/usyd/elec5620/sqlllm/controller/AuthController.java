@@ -70,6 +70,7 @@ public class AuthController {
         return ResponseResult.success(users);
     }
 
+    @CrossOrigin
     @PostMapping("/addQueryTime")
     public Object addQueryTime(@RequestBody Map<String, String> obj) throws Exception {
         String newDsKey = System.currentTimeMillis() + "";
@@ -83,7 +84,7 @@ public class AuthController {
         return ResponseResult.error("no current user");
     }
 
-    
+    @CrossOrigin
     @PostMapping("/minusQueryTime")
     public Object minusQueryTime(@RequestBody Map<String, String> obj) throws Exception {
         String newDsKey = System.currentTimeMillis() + "";
