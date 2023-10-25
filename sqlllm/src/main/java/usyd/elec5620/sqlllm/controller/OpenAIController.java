@@ -41,11 +41,13 @@ public class OpenAIController {
 
         User target = tableMapper.getUserByUsername(username);
         System.out.println(target);
-        if (target.getTimes() > 0) {
-            target.setTimes(target.getTimes() - 1);
-            tableMapper.updateUser(target);
-        } else {
-            return ResponseResult.error("No query times");
+        if (target != null) {
+            if (target.getTimes() > 0) {
+                target.setTimes(target.getTimes() - 1);
+                tableMapper.updateUser(target);
+            } else {
+                return ResponseResult.error("No query times");
+            }
         }
         OpenAiRequest openAiRequest = new OpenAiRequest();
         String reply = openAiService.send(askStr);
@@ -65,11 +67,13 @@ public class OpenAIController {
         this.tableMapper = (TableMapper) JdkParamDsMethodProxy.createProxyInstance(tableMapper, newDsKey, DynamicDataSourceConfig.userDb);
 
         User target = tableMapper.getUserByUsername(username);
-        if (target.getTimes() > 0) {
-            target.setTimes(target.getTimes() - 1);
-            tableMapper.updateUser(target);
-        } else {
-            return ResponseResult.error("No query times");
+        if (target != null) {
+            if (target.getTimes() > 0) {
+                target.setTimes(target.getTimes() - 1);
+                tableMapper.updateUser(target);
+            } else {
+                return ResponseResult.error("No query times");
+            }
         }
 
         String reply = openAiService.send(prompt);
