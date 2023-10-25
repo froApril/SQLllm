@@ -336,12 +336,8 @@
                     .then(data => {
                         console.log(data);
                         alert(data.resultData);
-
-
-
-
+                        localStorage.setItem("currentUser", "user")
                         document.getElementById('loginModal').style.display = "none";
-
                         //window.location.href = "admi.html"; // Navigate to admi.html
                     })
                     .catch(error => {
@@ -393,27 +389,36 @@
                 password: passwordValue
             };
 
-            fetch('http://localhost:8080/switch', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(dataToSend)
-            })
-                .then(response => response.json())
-                .then(data => {
-                    alert(data.resultData);
-                    document.getElementById('myModal').style.display = "none"; // Add this line to close the modal
-                    //document.getElementById('tableDetails').style.display = 'none';
+            if (localStorage.getItem("currentUser") == null) {
+                alert("Please login first")
+            } else {
+                fetch('http://localhost:8080/switch', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(dataToSend)
                 })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('An error occurred. Please try again.');
-                });
+                    .then(response => response.json())
+                    .then(data => {
+                        alert(data.resultData);
+                        document.getElementById('myModal').style.display = "none"; // Add this line to close the modal
+                        //document.getElementById('tableDetails').style.display = 'none';
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('An error occurred. Please try again.');
+                    });
+            }
+
         });
 
         //reset database
         document.getElementById('resetDatabaseButton').addEventListener('click', function () {
+            if (localStorage.getItem("currentUser") == null) {
+                alert("Please login first")
+                return
+            } 
             fetch('http://localhost:8080/reset', {
                 method: 'GET',
                 headers: {
@@ -552,7 +557,7 @@
                         console.error("Error:", error);
                         // Remove the loading message
                         chatOutput.removeChild(chatOutput.lastChild);
-                        displayBackendMessage("An error occurred while trying to send your message.");
+                        // displayBackendMessage("An error occurred while trying to send your message.");
                     });
                 // 清空输入框
                 messageInput.value = "";
@@ -584,25 +589,57 @@
 
         //chat part
         async function sendPostRequest(message) {
-            try {
-                const response = await fetch('http://localhost:8080/askAi', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ askStr: message })
-                });
-
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
+            if (localStorage.getItem("currentUser") == null) {
+                if (localStorage.getItem("guest") == null) {
+                    localStorage.setItem("guest", 3)
                 }
+                if (localStorage.getItem("guest") > 0) {
+                    try {
+                        const response = await fetch('http://localhost:8080/askAi', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({ askStr: message })
+                        });
 
-                const data = await response.json();
-                return data;
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
 
-            } catch (error) {
-                console.error('Error during fetch operation:', error.message);
-                throw error;
+                        const data = await response.json();
+                        localStorage.setItem("guest", localStorage.getItem("guest") - 1)
+                        return data;
+
+                    } catch (error) {
+                        console.error('Error during fetch operation:', error.message);
+                        throw error;
+                    }
+                } else {
+                    window.alert("Guest can only query 3 times")
+                    return
+                }
+            } else {
+                try {
+                    const response = await fetch('http://localhost:8080/askAi', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ askStr: message })
+                    });
+
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+
+                    const data = await response.json();
+                    return data;
+
+                } catch (error) {
+                    console.error('Error during fetch operation:', error.message);
+                    throw error;
+                }
             }
         }
 
