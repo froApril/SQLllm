@@ -6,7 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Database</title>
     <style>
-
         #startContainer {
             text-align: center;
         }
@@ -36,7 +35,7 @@
             background-color: #f2f2f2;
         }
 
-     
+
         .modal {
             display: none;
             position: fixed;
@@ -56,6 +55,11 @@
             border-radius: 5px;
 
         }
+        .modal-content, #userGuideContent {
+            max-height: 95vh; 
+            overflow-y: auto;
+        }
+        
 
         .closeModalButton {
             color: #aaa;
@@ -63,7 +67,7 @@
             font-size: 28px;
             font-weight: bold;
         }
-        
+
         .closeModalButton:hover,
         .closeModalButton:focus {
             color: black;
@@ -112,6 +116,11 @@
         #sendMessage:hover {
             background-color: #45a049;
         }
+
+        img {
+            max-width: 100%;
+            height: auto;
+        }
     </style>
 </head>
 
@@ -125,11 +134,70 @@
             <span id="closeUserGuideModal" class="closeModalButton">&times;</span>
             <h2>User Guide</h2>
             <div id="userGuideContent">
-                
+                <p>Here is a simple example of how to do it：</p>
+                <ol>
+                    <li>Starting interface: you can click login to log in or register a user. You can also continue to
+                        use it as a
+                        guest</li>
+                    <img src="./img/1.png">
+                    <li>Log in: Registered users can enter their username and password to log in directly. New users can
+                        click
+                        signup to enter the registration interface, and then log in after successful registration.If the
+                        account is
+                        user, it will return to the default starting interface in the logged-in state. If the user type
+                        is
+                        administrator, it will jump to the administrator interface.</li>
+                    <img src="./img/2.png">
+                    <li>Registration interface: User type can be selected. and set username and password</li>
+                    <img src="./img/3.png">
+                    <li>Connect to the default database: click show database, select the table of the database that
+                        needs to be
+                        browsed and operated in the newly generated drop-down window, and the details of the table will
+                        be displayed
+                        after clicking.</li>
+                    <img src="./img/4.png">
+                    <li>Connect to the user-specified database: Click connect to Database and enter the required
+                        database-related
+                        information.After clicking Confirm, the database can be successfully connected. After the
+                        connection is
+                        successful, click show database on the homepage. At this time, the drop-down window will display
+                        the tables
+                        in the connected database. Users can select any table to view details and perform operations. If
+                        you need to
+                        switch to other databases, click reset database. After clicking, the system will switch back to
+                        the default
+                        database. If you need to connect to other databases, repeat the above steps.</li>
+                    <img src="./img/5.png">
+                    <img src="./img/6.png">
+                    <li>Query data (this step can only be executed after connecting to the database and selecting a
+                        specific table):
+                        In the input box, enter the data you want to query, such as "show me the product with the lowest
+                        price",
+                        click Send. After a while, the system will return the SQL command corresponding to the
+                        statement. At this
+                        time, directly click the execute button, and the query results of the SQL command in the
+                        database will be
+                        displayed in the form of a table below the input box. Registered users have ten query
+                        opportunities, and
+                        guest users have three.</li>
+                    <img src="./img/7.png">
+                    <li>Administrator interface: The administrator interface will display the information of all
+                        registered users.
+                        Click the Settings button, and the management interface will pop up below. The administrator can
+                        operate the
+                        add and subtract buttons to adjust the number of available queries for each user.Administrator
+                        interface:
+                        The administrator interface will display the information of all registered users. Click the
+                        Settings button,
+                        and the management interface will pop up below. The administrator can operate the add and
+                        subtract buttons
+                        to adjust the number of available queries for each user.</li>
+                    <img src="./img/8.png">
+                </ol>
             </div>
         </div>
     </div>
-    
+
 
     <div id="loginModal" class="modal">
         <div class="modal-content">
@@ -209,7 +277,7 @@
     </div>
 
     <div id="tableContainer"></div>
-    
+
 
     <script>
 
@@ -239,7 +307,7 @@
         const confirmLoginButton = document.getElementById("confirmLogin");
         const loginUsername = document.getElementById("loginUsername");
         const loginPassword = document.getElementById("loginPassword");
-        const checkuserstate = 1 ;
+        const checkuserstate = 1;
 
         loginButton.addEventListener("click", () => {
             loginModal.style.display = "block";
@@ -342,9 +410,9 @@
                         console.log(data);
                         alert("login successfully !");
                         localStorage.setItem("currentUser", "user")
-                        localStorage.setItem('username',data.resultData.username);
+                        localStorage.setItem('username', data.resultData.username);
                         document.getElementById('loginModal').style.display = "none";
-                        if(data.resultData.type == 0){
+                        if (data.resultData.type == 0) {
                             window.location.href = "admi.html";
                         }
                         //window.location.href = "admi.html"; // Navigate to admi.html
@@ -363,22 +431,22 @@
             const guideButton = document.getElementById("guideButton");
             const userGuideModal = document.getElementById("userGuideModal");
             const closeUserGuideModalButton = document.getElementById("closeUserGuideModal");
-        
+
             guideButton.addEventListener("click", () => {
                 userGuideModal.style.display = "block";
             });
-        
+
             closeUserGuideModalButton.addEventListener("click", () => {
                 userGuideModal.style.display = "none";
             });
-        
+
             window.addEventListener("click", (event) => {
                 if (event.target == userGuideModal) {
                     userGuideModal.style.display = "none";
                 }
             });
         });
-        
+
 
         //switchdatabase
         document.getElementById('connectDatabase').addEventListener('click', function () {
@@ -427,7 +495,7 @@
             if (localStorage.getItem("currentUser") == null) {
                 alert("Please login first")
                 return
-            } 
+            }
             fetch('http://localhost:8080/reset', {
                 method: 'GET',
                 headers: {
@@ -490,10 +558,10 @@
         document.getElementById('tableDropdown').addEventListener('change', async function () {
             let selectedTable = this.value;
             console.log(selectedTable);
-            localStorage.setItem('tableNAME',selectedTable);
+            localStorage.setItem('tableNAME', selectedTable);
             if (selectedTable !== 'Select a table') {
                 try {
- 
+
                     const response = await fetch(`http://localhost:8080/table/info`, {
                         method: 'POST',
                         headers: {
@@ -511,7 +579,7 @@
                     let columns = data.resultData.columns;
                     let rowData = data.resultData.data;
                     console.log(columns);
-                    localStorage.setItem('columnNAME',columns);
+                    localStorage.setItem('columnNAME', columns);
                     // Build an HTML table for the columns
                     let tableHtml = '<table border="1">';
                     tableHtml += '<thead><tr>';
@@ -541,8 +609,8 @@
                 document.getElementById('tableDetails').innerText = '';  // Clear the details div
             }
         });
-        
-        
+
+
         //chat part
         sendMessageButton.addEventListener("click", () => {
             const message = messageInput.value.trim();
@@ -554,9 +622,9 @@
                         // Remove the loading message
                         chatOutput.removeChild(chatOutput.lastChild);
                         if (response.replyStr) {
-                            
+
                             displayBackendMessage(extractAndFormatString(response.replyStr));
-                            localStorage.setItem('sqlQuery',extractAndFormatString(response.replyStr));
+                            localStorage.setItem('sqlQuery', extractAndFormatString(response.replyStr));
                         } else {
                             displayBackendMessage("Sorry, I couldn't understand that.");
                         }
@@ -571,11 +639,11 @@
             }
         });
 
-        excuteMessageButton.addEventListener("click",() =>{
+        excuteMessageButton.addEventListener("click", () => {
             const message = localStorage.getItem("sqlQuery");
-            if(message){
+            if (message) {
                 sendExcuteRequest(message)
-                    
+
             }
         });
 
@@ -583,7 +651,7 @@
             console.log(input);
             const matches = input.match(/```sql\n([\s\S]*?)```/);
             if (matches && matches[1]) {
-              return matches[1].replace(/\n/g, ' ');
+                return matches[1].replace(/\n/g, ' ');
             }
             return "Couldn't find the content";
         }
@@ -612,7 +680,7 @@
         }
 
 
-        
+
         //chat part
         async function sendPostRequest(message) {
             if (localStorage.getItem("currentUser") == null) {
@@ -626,12 +694,12 @@
                             headers: {
                                 'Content-Type': 'application/json'
                             },
-                            body: JSON.stringify({ 
+                            body: JSON.stringify({
                                 sqlQuestion: message,
                                 tableName: localStorage.getItem("tableNAME"),
                                 columns: localStorage.getItem("columnNAME"),
                                 username: localStorage.getItem("username"),
-                             })
+                            })
                         });
 
                         if (!response.ok) {
@@ -655,18 +723,18 @@
                     console.log(localStorage.getItem("username"))
                     console.log(localStorage.getItem("tableNAME"))
                     console.log(localStorage.getItem("columnNAME"))
-                    
+
                     const response = await fetch('http://localhost:8080/askAi/sql', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json'
                         },
-                        body: JSON.stringify({ 
+                        body: JSON.stringify({
                             sqlQuestion: message,
                             tableName: localStorage.getItem("tableNAME"),
                             columns: localStorage.getItem("columnNAME"),
                             username: localStorage.getItem("username"),
-                         })
+                        })
                     });
 
                     if (!response.ok) {
@@ -683,15 +751,15 @@
             }
         }
 
-        async function sendExcuteRequest(message){
+        async function sendExcuteRequest(message) {
             const response = await fetch('http://localhost:8080/execute', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ 
+                body: JSON.stringify({
                     sql: message,
-                 })
+                })
             });
 
             if (!response.ok) {
@@ -700,13 +768,13 @@
 
 
             const data = await response.json();
-                if (data.success && Array.isArray(data.resultData)) {
-                    const tableContainer = document.getElementById('tableContainer');
-                    tableContainer.innerHTML = generateDynamicTable(data.resultData);
-                } else {
-                    console.error('Failed to fetch data:', data);
-                    document.getElementById('tableContainer').textContent = 'Failed to fetch data. Please check the console for errors.';
-                }     
+            if (data.success && Array.isArray(data.resultData)) {
+                const tableContainer = document.getElementById('tableContainer');
+                tableContainer.innerHTML = generateDynamicTable(data.resultData);
+            } else {
+                console.error('Failed to fetch data:', data);
+                document.getElementById('tableContainer').textContent = 'Failed to fetch data. Please check the console for errors.';
+            }
         }
 
         function generateDynamicTable(data) {
@@ -715,7 +783,7 @@
             }
 
             let tableHtml = '<table border="1"><thead><tr>';
-            
+
             // Generate table headers
             const headers = Object.keys(data[0]);
             headers.forEach(header => {
@@ -735,10 +803,10 @@
             tableHtml += '</tbody></table>';
             return tableHtml;
         }
-        
-            
 
-        
+
+
+
 
     </script>
 </body>
